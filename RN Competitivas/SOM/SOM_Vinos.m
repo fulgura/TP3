@@ -1,109 +1,172 @@
-clear all
-clc
+clear all;
+clc;
 
-
-%% Leemos el Archivo de Vinos para generar el P
-Datos = csvread('Vinos.csv');
-[Filas Columnas] = size(Datos);
-Datos = escalar(Datos, 2:Columnas);
-P = Datos(:, 2:Columnas);
-NroClase = Datos(:, 1);
+datos = csvread('Vinos.csv');
+[Filas, Cols] = size(datos);
+datos = escalar(datos,2:Cols); 
+P = datos(:, 2:Cols);
+NroClase = datos(:,1);
 P = P';
 
-
-
-% Disposicion de las neuronas de la capa oculta
-fil_ocultas =6;
-col_ocultas = 5;
-pos = gridtop( col_ocultas, fil_ocultas);
-pasos=linkdist(pos);
-[entradas, CantPatrones] = size(P);
-ocultas = fil_ocultas * col_ocultas;
+%P = rands(2,1000); 
+% Disposicion de las neuronas de la capa oculta 
+fil_ocultas = 6; 
+col_ocultas = 5; 
+pos = gridtop( col_ocultas, fil_ocultas); 
+pasos=linkdist(pos); 
+[entradas, CantPatrones] = size(P); 
 
 mezcla = randperm(CantPatrones);
-P = P(:, mezcla);
-NroMezcla = NroClase(mezcla);
+P = P(:,mezcla);
+NroClase = NroClase(mezcla);
+%Y = NroClase';
+Y = zeros(3,CantPatrones);
+for index = 1:CantPatrones
+    Y(NroClase(index), index) = 1;
+end
 
+ocultas = fil_ocultas * col_ocultas; 
+% Pesos iniciales 
+W = ones(entradas,ocultas) * 0.5; 
 
-% Pesos iniciales
-W = 0.5 * ones(entradas,ocultas);
-
-%% Definimos variables
-vecinas=3;
-ITE_MAX = 500;
-alfa = 0.05;
+vecinas = 3; 
+ITE_MAX = 100; 
+alfa = 0.05; 
 ite = 0;
 Reduccion = 20;
-WAnt = 100 * ones(entradas,ocultas);
-Dife = mean(sqrt(sum((WAnt - W).^2)));
-ITE_MIN = (vecinas + 2) * Reduccion;
+ITE_MIN = (vecinas+2)*Reduccion;
 
+WAnt = 100*ones(entradas, ocultas);
+Dife = mean(sqrt(sum(WAnt - W).^2));
 
-%% Calculo del SOM0
-while ( (ite <= ITE_MAX ) & (Dife > 0.00001) ) || (ite < ITE_MIN),
-    
+while (( ite <= ITE_MAX ) && (Dife > 0.01)) || (ite < ITE_MIN)% "W no cambie mucho?
+    ite = ite + 1;
     WAnt = W;
-    for patr = 1:CantPatrones,
-        %% buscar el W mas proximo
-        % mayor contiene el n?mero de neurona ganadora
-        
-        distancias = sqrt(sum((P(:,patr) * ones(1,ocultas) - W).^2));
+    for patr =1:CantPatrones, 
+        %buscar el W mas proximo
+        distancias = sqrt(sum((P(:,patr)*ones(1,ocultas) - W).^2));
         [DMin, ganadora] = min(distancias);
         
-        %% Actualizar la neurona ganadora y su vecindad
-        for c = 1:ocultas
-            if pasos(ganadora, c) <= vecinas
-                % Actualizar W por que es la ganadora o la vecina
-                W(:,c) = W(:,c) + alfa * (P(:, patr) - W(:, c));
+        %Actualizar la neurona ganadora y su vecindad 
+        for c=1:ocultas
+            if pasos(ganadora,c) <= vecinas
+                %actualizar W porque es la ganadora o una vecina
+                W(:,c) = W(:,c) + alfa * (P(:,patr) - W(:,c));
             end
         end
-        
     end
-    Dife = mean(sqrt(sum((WAnt - W).^2)));
-    
-    if (vecinas>=1) & (mod(ite,Reduccion)==0),
-        vecinas = vecinas-1;
-    end
-    ite = ite + 1;
-    
-    %% Imprimimos variables que nos interesan
-    [ite]
-    
+    Dife = mean(sqrt(sum(WAnt - W).^2));
+    if (vecinas>=1) & (mod(ite,Reduccion)==0), 
+        vecinas = vecinas-1; 
+    end 
 end
 
-
-%% Dibujemos la red de los ejemplos de Vino TIPO I
-
+% dibujemos la red para los ejemplos de vino TIPO 1
 mapa = zeros(fil_ocultas, col_ocultas);
 
-for patr = 1:CantPatrones
-    
+for patr=1:CantPatrones
     if NroClase(patr) == 1
-        % buscar el W m?s pr?ximo
-        distancias = sqrt(sum((P(:,patr)*ones(1,ocultas) - W) .^2));
+        %buscar el W mas proximo
+        distancias = sqrt(sum((P(:,patr)*ones(1,ocultas) - W).^2));
         [DMin, ganadora] = min(distancias);
+        %f = fix( ganadora / col_ocultas );
+        %c = ganadora;
         mapa(ganadora) = mapa(ganadora) + 1;
+        
     end
+end
+
+
+% calcular para c/clase la lista de patrones que contiene 
+clases = []; 
+clases = zeros(ocultas,max(NroClase));
+ganadoras = zeros(1,CantPatrones);
+for i = 1:CantPatrones 
+    %Calcular la neurona ganadora
+    distancias = sqrt(sum((P(:,i)*ones(1,ocultas) - W).^2));
+    [DMin, ganadora] = min(distancias);
+    ganadoras(1,i) = ganadora;
+    c= NroClase(i); %ven?a con los patrones 
+    clases(ganadora, c) = clases(ganadora, c ) + 1; 
+end
+ganadoras
+
+% mapa = cell(fil_ocultas, col_ocultas); 
+% for nro = 1:ocultas 
+%     texto = ''; 
+%     for cl = min(NroClase):max(NroClase) 
+%         if clases(nro, cl) > 0 
+%             if ~isempty(texto)
+%                 texto = strcat(texto, ' ; '); 
+%             end 
+%             textoA = sprintf('c%d -->%d', cl, clases(nro,cl));
+%             texto= [texto ',' textoA];
+%         end; 
+%     end; 
+%     fila = fil_ocultas -floor( (nro-1)/col_ocultas ); 
+%     col  = mod( (nro-1), col_ocultas ) + 1; 
+%     mapa(fila,col) = {[texto]}; 
+% end; 
+% 
+% mapa
+
+
+
+%% hacer la capa de salida como hicimos con CPN, tomar el 80 para entrenar
+%% y 20 de testeo. Actualizar los valores de los arcos que salen de la
+%% neurona ganadora, ver ppt de CPN pag. 12. Solo se actualiza de la
+%% neurona ganadora a la capa de salida. 
+beta = 0.1; 
+salidas = 3;
+W2 = zeros( salidas, ocultas);
+W2Ant = 100*ones(salidas, ocultas);
+ITE_MAX = 50;
+ite = 0;
+Dife = max(sqrt(sum(W2Ant - W2).^2));
+
+while ( ite <= ITE_MAX )  & (Dife > 0.001), 
+    ite = ite + 1;
+    W2Ant = W2;
+    for i=1:CantPatrones, 
+        %buscar el W mas proximo 
+        distancias = sqrt(sum((P(:,i)*ones(1,ocultas) - W).^2));
+        [DMin, ganadora] = min(distancias);
+        
+        %Actualizar los pesos que salen de la neurona 
+        %  ganadora 
+        W2( :, ganadora) = W2(:, ganadora) + beta * (Y(:, i) - W2 (:, ganadora));    
+    end  
+    Dife = max(sqrt(sum(W2Ant - W2).^2));
+    [ite Dife]
+    %redibujar 
+end
+
+%Obtengo las Salidas de Train 
+SalidasTrain = zeros(salidas,CantPatrones);
+for i= 1:CantPatrones
+    distancias = sqrt(sum((P(:,i)*ones(1,ocultas) - W).^2));
+    [DMin, ganadora] = min(distancias);  
+    SalidasTrain(:,i) = W2(:,ganadora);
+end;
+
+SalidasTrain
+
+indices = (SalidasTrain >= - 0.2) & (SalidasTrain <= 0.2);
+SalidasTrain(indices) = 0;
+
+indices = (SalidasTrain >= 0.8) & (SalidasTrain <= 1.2);
+SalidasTrain(indices) = 1;
     
-end
+   
+%Calculo solo la cantidad de correctos
+CantCorrectos = sum(all(SalidasTrain == Y,1));
+CantCorrectos
+%W2
 
 
 
-for f=fil_ocultas:-1:1
-    mapa(f,:)
-end
-
-mapa(fil_ocultas:-1:1,:)
 
 
-% %% mapa para todas las clases
-% % calcular para c/clase la lista de patrones que contiene
-% clases = [];
-% clases = zeros(ocultas,max(NroClase));
-% for i = 1:CantPatrones,
-%     %Calcular la neurona ganadora
-%     [DMax mayor] = max(-sqrt( sum(((ones(ocultas,1)*P(i,:) - W).^2),2 ) ));
-%     c = NroClase(i); %ven?a con los patrones
-%     clases(mayor, c) = clases(mayor, c ) + 1;
-% end
+
+
 
