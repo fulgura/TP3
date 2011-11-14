@@ -3,6 +3,7 @@ function [ M ] = Mezclar( Datos )
 %   Detailed explanation goes here
 
 [CantidadPatrones, CantidadAtributos] = size(Datos);
+
 mezcla = randperm(CantidadPatrones);
 M = Datos(mezcla,:);
 end
