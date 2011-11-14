@@ -26,7 +26,7 @@ while ( ite <= ITE_MAX )  & (Dife > 0.001),
         W2( :, ganadora) = W2(:, ganadora) + Beta * (Y(:, i) - W2 (:, ganadora));    
     end  
     Dife = max(sqrt(sum(W2Ant - W2).^2));
-    [ite Dife]
+    %%[ite Dife]
      
 end
 
