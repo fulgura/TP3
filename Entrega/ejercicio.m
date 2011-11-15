@@ -40,7 +40,11 @@ for i = 1 : 10
     %% Pasamos por la red SOM
     W = Som(Patrones, MAX_ITE, Alfa, vecindad, FilasOcultas, ColumnasOcultas);
     
-    % [ clases, ganadoras] = Ganadoras( Patrones', Clase, W )
+    
+    %% Calculamos el mapa
+    [clases, ganadoras] = Ganadoras(Patrones, T, W);
+    mapa = Mapa(FilasOcultas, ColumnasOcultas, clases)
+    
     
     W2 = CapaSalida(Patrones, Clase, W, Salidas, (FilasOcultas * ColumnasOcultas), MAX_ITE, Beta);
     
@@ -73,7 +77,7 @@ for i = 1 : 10
     %% La tasa de acierto por clase para el grupo de testeo
     TasasAciertosTest = [CorrectosTest (CorrectosTest ./ sum(Clase,2))];
     AciertosTest = [AciertosTest TasasAciertosTest];
-
+    
 end
 
 dlmwrite('Salidas/AciertosTrain.csv',AciertosTrain,'delimiter','\t');
