@@ -8,15 +8,15 @@ FilasOcultas = 9;       % Disposicion de las neuronas de la capa oculta
 ColumnasOcultas = 9;    %
 
 Alfa = 0.05;            %
-Beta = 0.05;            %
+Beta = 0.1;            %
 MAX_ITE = 1000;          %
 Salidas = 7;            % Cantidad de clases definidas
-vecindad = 5;           %
+vecindad = 3;           %
 
 AciertosTrain = [];
 AciertosTest = [];
 
-for i = 1 : 10
+for i = 1 : 10  
     %% Leemos los datos especificos del TP
     Train = csvread('Segment_Train.csv');   % <210x20 double>
     Test = csvread('Segment_Test.csv');     % <2100x20 double>
@@ -43,7 +43,7 @@ for i = 1 : 10
     
     %% Calculamos el mapa
     [clases, ganadoras] = Ganadoras(Patrones, T, W);
-    mapa = Mapa(FilasOcultas, ColumnasOcultas, clases)
+    mapa = Mapa(FilasOcultas, ColumnasOcultas, clases);
     
     
     W2 = CapaSalida(Patrones, Clase, W, Salidas, (FilasOcultas * ColumnasOcultas), MAX_ITE, Beta);
@@ -55,6 +55,12 @@ for i = 1 : 10
     %% La tasa de acierto por clase para el grupo de entrenamiento
     TasasAciertosTrain = [CorrectosTraining (CorrectosTraining ./ sum(Clase,2))];
     AciertosTrain = [AciertosTrain TasasAciertosTrain];
+    
+    %% Calculamos el promedio que llevamos de aciertos en training en cada corrida
+    
+    
+    
+    
     
     %% Procesamos los valores a utilizar para testing
     
