@@ -8,7 +8,7 @@ FilasOcultas = 9;       % Disposicion de las neuronas de la capa oculta
 ColumnasOcultas = 9;    %
 
 Alfa = 0.05;            %
-Beta = 0.1;            %
+Beta = 0.05;            %
 MAX_ITE = 1000;          %
 Salidas = 7;            % Cantidad de clases definidas
 vecindad = 3;           %
@@ -57,7 +57,8 @@ for i = 1 : 10
     AciertosTrain = [AciertosTrain TasasAciertosTrain];
     
     %% Calculamos el promedio que llevamos de aciertos en training en cada corrida
-    
+    promedios = mean(AciertosTrain(:,2:2:end),2);
+    promedios
     
     
     
