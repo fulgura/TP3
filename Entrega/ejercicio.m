@@ -5,13 +5,13 @@ clc;
 
 %% Definimos los parametros necesarios para el experimento
 FilasOcultas = 9;       % Disposicion de las neuronas de la capa oculta
-ColumnasOcultas = 9;    %
+ColumnasOcultas = 9;    
 
-Alfa = 0.05;            %
-Beta = 0.05;            %
-MAX_ITE = 1000;          %
-Salidas = 7;            % Cantidad de clases definidas
-vecindad = 3;           %
+Alfa = 0.05;            % Alfa es el par?metro utilizado para el c?lculo de la capa oculta 
+Beta = 0.05;            % Beta es el par?metro utilizado para el c?lculo de la capa de salida
+MAX_ITE = 1000;         % Maxima cantidad de iteraciones soportables en los calculos de W y W2
+Salidas = 7;            % Cantidad de clases definidas 
+vecindad = 3;           % Par?metro utilizado para criterio de vecindad
 
 AciertosTrain = [];
 AciertosTest = [];
@@ -20,8 +20,6 @@ for i = 1 : 10
     %% Leemos los datos especificos del TP
     Train = csvread('Segment_Train.csv');   % <210x20 double>
     Test = csvread('Segment_Test.csv');     % <2100x20 double>
-    
-    
     
     %% Mezcla de los datos utilidados para training
     [CantidadPatrones, CantidadColumnas] = size(Train);
@@ -46,11 +44,23 @@ for i = 1 : 10
     mapa = Mapa(FilasOcultas, ColumnasOcultas, clases);
     
     
-    W2 = CapaSalida(Patrones, Clase, W, Salidas, (FilasOcultas * ColumnasOcultas), MAX_ITE, Beta);
+    W2 = CapaSalida(Patrones, ...
+                    Clase, ...
+                    W, ...
+                    Salidas, ...
+                    (FilasOcultas * ColumnasOcultas), ...
+                    MAX_ITE, ...
+                    Beta);
     
     %% Caluclamos las cantidades de correctamente clasificados en training y la
     % cantidada de correctamente clasificados para cada clase
-    [ CantCorrectosTraining, CorrectosTraining ] = Resultados( Patrones, Clase, Salidas, (FilasOcultas * ColumnasOcultas), W ,W2 );
+    [ CantCorrectosTraining, ...
+        CorrectosTraining ] = Resultados( Patrones, ...
+                                          Clase, ...
+                                          Salidas, ...
+                                          (FilasOcultas * ColumnasOcultas), ...
+                                          W, ...
+                                          W2 );
     
     %% La tasa de acierto por clase para el grupo de entrenamiento
     TasasAciertosTrain = [CorrectosTraining (CorrectosTraining ./ sum(Clase,2))];
@@ -59,8 +69,6 @@ for i = 1 : 10
     %% Calculamos el promedio que llevamos de aciertos en training en cada corrida
     promedios = mean(AciertosTrain(:,2:2:end),2);
     promedios
-    
-    
     
     
     %% Procesamos los valores a utilizar para testing
@@ -79,7 +87,13 @@ for i = 1 : 10
     
     %% Caluclamos las cantidades de correctamente clasificados en test y la
     % cantidada de correctamente clasificados para cada clase
-    [ CantCorrectosTest, CorrectosTest ] = Resultados( Patrones, Clase, Salidas, (FilasOcultas * ColumnasOcultas), W ,W2 );
+    [ CantCorrectosTest, ...
+        CorrectosTest ] = Resultados( Patrones, ...
+                                      Clase, ...
+                                      Salidas, ...
+                                      (FilasOcultas * ColumnasOcultas), ...
+                                      W , ...
+                                      W2);
     
     %% La tasa de acierto por clase para el grupo de testeo
     TasasAciertosTest = [CorrectosTest (CorrectosTest ./ sum(Clase,2))];
