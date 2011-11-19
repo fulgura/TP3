@@ -1,7 +1,8 @@
 function [ CantCorrectos, Correctos ] = Resultados( P, Y, salidas, ocultas, W ,W2 )
 %% RESULTADOS Calculo de cantidad de correctamente clasificados en la capa
 % de salida de una red SOM.
-%   
+%
+%
 
 %% Implementacion 
 [entradas, CantPatrones] = size(P);
